@@ -12,6 +12,10 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * REST controller for inventory operations.
+ * Delegates business logic to InventoryService.
+ */
 @RestController
 @AllArgsConstructor
 public class InventoryController implements InventoryApi {

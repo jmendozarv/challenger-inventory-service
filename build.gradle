@@ -82,8 +82,8 @@ tasks.named('test') {
 }
 
 tasks.named('javadoc') {
-    source = fileTree('src/main/java') {
-        include '**/*.java'
-    }
+    dependsOn tasks.named('openApiGenerate')
+    source = sourceSets.main.allJava
     classpath = sourceSets.main.compileClasspath
+    options.addStringOption('Xdoclint:none', '-quiet')
 }

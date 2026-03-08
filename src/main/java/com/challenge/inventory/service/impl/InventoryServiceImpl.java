@@ -17,6 +17,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Implementation of inventory service with reactive operations.
+ * Uses bounded elastic scheduler for blocking JPA operations.
+ */
 @Service
 @AllArgsConstructor
 public class InventoryServiceImpl implements InventoryService {

@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * JPA entity representing inventory stock per product.
+ */
 @Entity
 @Table(name = "inventory")
 @Setter
