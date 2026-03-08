@@ -2,6 +2,7 @@ package com.challenge.inventory.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.challenge.inventory.entity.InventoryEntity;
@@ -87,12 +88,13 @@ class InventoryServiceImplTest {
   }
 
   @Test
-  void createInventoryShouldReturnMappedResponse() {
+  void createInventoryShouldReturnMappedResponseWhenProductDoesNotExist() {
     InventoryRequest request = new InventoryRequest(200L, 8);
     InventoryEntity entity = InventoryEntity.builder().productId(200L).stock(8).build();
     InventoryEntity saved = InventoryEntity.builder().id(1L).productId(200L).stock(8).build();
     InventoryResponse response = new InventoryResponse().id(1L).productId(200L).stock(8);
 
+    when(inventoryRepository.findByProductId(200L)).thenReturn(Optional.empty());
     when(inventoryMapper.toEntity(request)).thenReturn(entity);
     when(inventoryRepository.save(entity)).thenReturn(saved);
     when(inventoryMapper.toResponse(saved)).thenReturn(response);
@@ -100,5 +102,24 @@ class InventoryServiceImplTest {
     StepVerifier.create(service.createInventory(request))
         .expectNext(response)
         .verifyComplete();
+  }
+
+  @Test
+  void createInventoryShouldUpdateStockWhenProductAlreadyExists() {
+    InventoryRequest request = new InventoryRequest(200L, 15);
+    InventoryEntity existing = InventoryEntity.builder().id(9L).productId(200L).stock(3).build();
+    InventoryEntity saved = InventoryEntity.builder().id(9L).productId(200L).stock(15).build();
+    InventoryResponse response = new InventoryResponse().id(9L).productId(200L).stock(15);
+
+    when(inventoryRepository.findByProductId(200L)).thenReturn(Optional.of(existing));
+    when(inventoryRepository.save(existing)).thenReturn(saved);
+    when(inventoryMapper.toResponse(saved)).thenReturn(response);
+
+    StepVerifier.create(service.createInventory(request))
+        .expectNext(response)
+        .verifyComplete();
+
+    assertEquals(15, existing.getStock());
+    verify(inventoryMapper, org.mockito.Mockito.never()).toEntity(request);
   }
 }

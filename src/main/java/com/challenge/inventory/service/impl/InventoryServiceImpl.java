@@ -43,12 +43,16 @@ public class InventoryServiceImpl implements InventoryService {
         }, () -> {
           throw new IllegalArgumentException(MSG_REQUEST_NULL);
         });
-
-    Supplier<InventoryEntity> entitySupplier = () -> inventoryMapper.toEntity(request);
-
-    return Mono.fromRunnable(() -> validateRequest.accept(request))
-        .then(Mono.fromSupplier(entitySupplier))
-        .map(inventoryRepository::save)
+    return Mono.fromCallable(() -> {
+          validateRequest.accept(request);
+          InventoryEntity entityToSave = inventoryRepository.findByProductId(request.getProductId())
+              .map(existing -> {
+                existing.setStock(request.getStock());
+                return existing;
+              })
+              .orElseGet(() -> inventoryMapper.toEntity(request));
+          return inventoryRepository.save(entityToSave);
+        })
         .map(inventoryMapper::toResponse)
         .subscribeOn(Schedulers.boundedElastic())
         .onErrorMap(this::mapUnexpectedError);
